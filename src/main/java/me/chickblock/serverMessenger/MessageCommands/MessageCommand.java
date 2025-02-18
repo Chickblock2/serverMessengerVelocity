@@ -1,21 +1,23 @@
 package me.chickblock.serverMessenger.MessageCommands;
 
+import com.velocitypowered.api.plugin.Plugin;
+import me.chickblock.serverMessenger.MessageListeners.ServerMessengerEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 public class MessageCommand {
     private final String name;
     private final byte[] commandKeyWord;
     private final SendType sendType;
     private final ResponseType responseType;
-    private final byte[] messageContents;
+    private final Plugin registeredPlugin;
+    private int registryID = -1;
 
 
-    public MessageCommand(@Nullable String commandTypeName, @NotNull String commandKeyWord, @NotNull SendType sendType, @NotNull ResponseType responseType){
-        this(commandTypeName, commandKeyWord, null, sendType, responseType);
-    }
-
-    public MessageCommand(@Nullable String commandTypeName, @NotNull String commandKeyWord, byte @Nullable [] messageContents, @NotNull SendType sendType, @NotNull ResponseType responseType){
+    public MessageCommand(@Nullable String commandTypeName, @NotNull String commandKeyWord, @NotNull SendType sendType, @NotNull ResponseType responseType, @NotNull Plugin registeringPlugin){
         if(commandKeyWord.isBlank()){
             throw new IllegalArgumentException("Command word cannot be blank.");
         }
@@ -23,29 +25,65 @@ public class MessageCommand {
         this.name = commandTypeName;
         this.sendType = sendType;
         this.responseType = responseType;
-        this.messageContents = messageContents;
+        this.registeredPlugin = registeringPlugin;
     }
 
-    protected String getName(){
+    public String getName(){
         return name;
     }
 
-    protected byte[] getCommandKeyWord(){
+    public byte[] getCommandKeyWord(){
         return commandKeyWord;
     }
 
-    protected SendType getSendType(){
+    public SendType getSendType(){
         return sendType;
     }
 
-    protected ResponseType getResponseType(){
+    public ResponseType getResponseType(){
         return responseType;
     }
 
-    protected byte[] getMessageContents(){
-        return messageContents;
+
+    public Plugin getRegisteredPlugin() {
+        return registeredPlugin;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        MessageCommand that = (MessageCommand) o;
+        return Objects.deepEquals(commandKeyWord, that.commandKeyWord) && sendType == that.sendType && responseType == that.responseType && Objects.equals(registeredPlugin, that.registeredPlugin);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(Arrays.hashCode(commandKeyWord), sendType, responseType, registeredPlugin);
+    }
 
+    @Override
+    public String toString() {
+        return "MessageCommand{" +
+                "name='" + name + '\'' +
+                ", commandKeyWord=" + Arrays.toString(commandKeyWord) +
+                ", sendType=" + sendType +
+                ", responseType=" + responseType +
+                ", registeredPlugin=" + registeredPlugin +
+                '}';
+    }
+
+    public int getRegistryID() {
+        return registryID;
+    }
+
+    public void setRegistryID(int i){
+        this.registryID = i;
+    }
+
+    public PluginMessage generatePluginMessageListener(){
+        if(responseType == ResponseType.REQUIRED){
+            boolean responseRequired = true;
+        }
+        return new ServerMessengerEvent(commandKeyWord, registeredPlugin.id(), responseRequired, );
+    }
 }

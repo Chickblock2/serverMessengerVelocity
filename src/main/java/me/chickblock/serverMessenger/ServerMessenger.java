@@ -1,21 +1,26 @@
 package me.chickblock.serverMessenger;
 
-import com.google.common.io.ByteArrayDataOutput;
+
+import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
+import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
+import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import me.chickblock.serverMessenger.MessageCommands.MessageCommand;
+import me.chickblock.serverMessenger.MessageListeners.ServerMessengerEvent;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-
-
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 
 
 @Plugin(
@@ -24,7 +29,7 @@ import java.io.DataOutputStream;
         version = BuildConstants.VERSION
 )
 public class ServerMessenger {
-
+    public final static String PLUGIN_MESSAGING_CHANNEL = "servermessenger";
     private final ProxyServer server;
     private final Logger logger;
     private static MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.from("servermessenger:main");
@@ -42,36 +47,61 @@ public class ServerMessenger {
         logger.info("Server messenger has successfully started.");
     }
 
-
-    public byte[] composeServerCommand(MessageCommandType commandType) throws Exception {
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF("Forward");
-        out.writeUTF(server.toString());
-        out.writeUTF(IDENTIFIER.toString());
-
-        ByteArrayOutputStream msgBytes = new ByteArrayOutputStream();
-        DataOutputStream msgOut = new DataOutputStream(msgBytes);
-        switch(commandType){
-            case RESTARTSBACKEND:
-                msgOut.writeUTF("RESTARTBACKEND");
-                break;
-            default:
-                logger.error("This shit ain't done cooking yet, call back later");
-                return null;
+    @Subscribe
+    public void onPluginMessageFromBackend(PluginMessageEvent event){
+        if(!IDENTIFIER.equals(event.getIdentifier())){
+            return;
+        }else{
+            event.setResult(PluginMessageEvent.ForwardResult.handled());
         }
-        byte[] byteArr = msgBytes.toByteArray();
-        out.writeShort(byteArr.length);
-        out.write(byteArr);
 
-        return out.toByteArray();
+        if(event.getSource() instanceof Player player){
+            logger.warn("Received plugin message originating from a player. This may indicate a player is attempting to spoof messages to the proxy.\nPlayer name: " + player.getUsername() + "(" + player.getUniqueId() + ")");
+        }else if(event.getSource() instanceof ServerConnection){
+            ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
+            String subchannel = in.readUTF();
+            if (subchannel.equals(ServerMessenger.PLUGIN_MESSAGING_CHANNEL)) {
+                short len = in.readShort();
+                byte[] msgbytes = new byte[len];
+                in.readFully(msgbytes);
+
+                DataInputStream msgIn = new DataInputStream(new ByteArrayInputStream(msgbytes));
+                String keyWord;
+                boolean requiresResponse;
+                String pluginID;
+                String messageContents;
+                ServerMessengerEvent SMEvent;
+                try {
+                    keyWord = msgIn.readUTF(); // Read the data in the same way you wrote it
+                    requiresResponse = msgIn.readBoolean();
+                    pluginID = msgIn.readUTF();
+                    messageContents = msgIn.readUTF();
+                    server.getEventManager().fire(new ServerMessengerEvent(keyWord, pluginID, requiresResponse, messageContents)).thenAccept((returnedEvent) -> {
+                        if(requiresResponse){
+                            if(returnedEvent.getReplyMessage() != null && MessageCommandRegistry.commandIDIsValid(returnedEvent.getMessageCommandRegistryID())){
+                                sendMessage(((ServerConnection) event.getSource()).getServer(), returnedEvent.getMessageCommandRegistryID(), returnedEvent.getMessageContents());
+                            }else{
+                                logger.warn("No reply was set for a message that required a response. An error message will be sent.");
+                                // TODO: Send error message lol
+                            }
+                        }
+                    });
+                } catch (IOException e) {
+                    logger.warn("Received malformed packet data from server: " + ((ServerConnection) event.getSource()).getServer().toString() + " This could be the result of a buggy plugin on that server.");
+                }
+            }
+        }
     }
 
-    private boolean sendToBackend(RegisteredServer server, byte[] data){
-        return sendToBackend(server, IDENTIFIER, data);
+    public boolean sendMessage(@NotNull RegisteredServer server, int messageCommandRegistryID, @NotNull String messageContents){
+        return false;
     }
 
-    private boolean sendToBackend(RegisteredServer server, ChannelIdentifier identifier, byte[] data){
-        return server.sendPluginMessage(identifier, data);
+    public boolean sendMessage(@NotNull RegisteredServer server, MessageCommand messageCommand, @NotNull String messageContents){
+        if(!MessageCommandRegistry.commandIDIsValid(messageCommand.getRegistryID())){
+            logger.warn("A plugin is attempting to send an unregistered command, this is unsupported behavior and likely means the plugin owner is not properly using Server Messenger.");
+        }
+        return false;
     }
 
 
