@@ -38,7 +38,7 @@ public class MessageCommandRegistry {
         return idRegistry;
     }
 
-    public static boolean removeMessageCommand(@NotNull MessageCommand command){
+    protected static boolean removeMessageCommand(@NotNull MessageCommand command){
         log.warn("Attempting to deregister message command: " + command.getName() + ". This is NOT supported behavior and may cause problems if a message is in transit.");
         int index = commandRegistry.indexOf(command);
         if(index >= 0){
@@ -49,7 +49,7 @@ public class MessageCommandRegistry {
         }
     }
 
-    public static boolean removeMessageCommand(int registryIndex){
+    protected static boolean removeMessageCommand(int registryIndex){
         log.warn("Attempting to deregister message command at index of: '" + registryIndex + "' in the registry. This is NOT supported behavior and may cause problems if a message is in transit.");
         try{
             commandRegistry.remove(registryIndex);

@@ -1,7 +1,6 @@
 package me.chickblock.serverMessenger.MessageCommands;
 
 import com.velocitypowered.api.plugin.Plugin;
-import me.chickblock.serverMessenger.MessageListeners.ServerMessengerEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,6 +83,7 @@ public class MessageCommand {
         if(responseType == ResponseType.REQUIRED){
             boolean responseRequired = true;
         }
-        return new ServerMessengerEvent(commandKeyWord, registeredPlugin.id(), responseRequired, );
+        return null;
+        //return new ServerMessengerEvent(commandKeyWord, registeredPlugin.id(), responseRequired, );
     }
 }

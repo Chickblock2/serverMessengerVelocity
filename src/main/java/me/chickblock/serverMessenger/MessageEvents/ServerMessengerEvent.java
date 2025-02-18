@@ -1,4 +1,4 @@
-package me.chickblock.serverMessenger.MessageListeners;
+package me.chickblock.serverMessenger.MessageEvents;
 
 import me.chickblock.serverMessenger.MessageCommands.PluginMessage;
 import org.jetbrains.annotations.NotNull;
@@ -9,7 +9,7 @@ public class ServerMessengerEvent{
     private boolean requireResponse;
     private String messageContents;
     private PluginMessage replyMessage = null;
-    private int messageCommandRegistryID = -1;
+    private int messageEventRegistryID = -1;
 
     public ServerMessengerEvent(@NotNull String keyWord, @NotNull String pluginID, boolean requireResponse, @NotNull String messageContents){
         this.keyWord = keyWord;
@@ -43,12 +43,13 @@ public class ServerMessengerEvent{
         return replyMessage;
     }
 
-    public int getMessageCommandRegistryID() {
-        return messageCommandRegistryID;
+    public int getMessageEventRegistryID() {
+        return messageEventRegistryID;
     }
 
-    public void setMessageCommandRegistryID(int messageCommandRegistryID) {
-        this.messageCommandRegistryID = messageCommandRegistryID;
+    public void setMessageEventRegistryID(int messageEventRegistryID) {
+        this.messageEventRegistryID = messageEventRegistryID;
     }
+
 }
 

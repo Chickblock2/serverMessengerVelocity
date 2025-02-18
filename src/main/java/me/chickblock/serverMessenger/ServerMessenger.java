@@ -14,7 +14,8 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.chickblock.serverMessenger.MessageCommands.MessageCommand;
-import me.chickblock.serverMessenger.MessageListeners.ServerMessengerEvent;
+import me.chickblock.serverMessenger.MessageEvents.EventClassRegistry;
+import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -71,20 +72,22 @@ public class ServerMessenger {
                 String pluginID;
                 String messageContents;
                 ServerMessengerEvent SMEvent;
+                Plugin plugin;
+                Object eventToFire;
                 try {
                     keyWord = msgIn.readUTF(); // Read the data in the same way you wrote it
                     requiresResponse = msgIn.readBoolean();
                     pluginID = msgIn.readUTF();
                     messageContents = msgIn.readUTF();
-                    server.getEventManager().fire(new ServerMessengerEvent(keyWord, pluginID, requiresResponse, messageContents)).thenAccept((returnedEvent) -> {
-                        if(requiresResponse){
-                            if(returnedEvent.getReplyMessage() != null && MessageCommandRegistry.commandIDIsValid(returnedEvent.getMessageCommandRegistryID())){
-                                sendMessage(((ServerConnection) event.getSource()).getServer(), returnedEvent.getMessageCommandRegistryID(), returnedEvent.getMessageContents());
-                            }else{
-                                logger.warn("No reply was set for a message that required a response. An error message will be sent.");
-                                // TODO: Send error message lol
-                            }
-                        }
+                    // Check for registered plugin to fire event for.
+                    plugin = EventClassRegistry.findPluginFromID(pluginID);
+                    if(plugin != null){
+                        eventToFire = EventClassRegistry.getEventFromPlugin(plugin);
+                    }else{
+                        eventToFire = new ServerMessengerEvent(keyWord, pluginID, requiresResponse, messageContents);
+                    }
+                    server.getEventManager().fire(eventToFire).thenAccept((returnedEvent) -> {
+                        // TODO: handle response
                     });
                 } catch (IOException e) {
                     logger.warn("Received malformed packet data from server: " + ((ServerConnection) event.getSource()).getServer().toString() + " This could be the result of a buggy plugin on that server.");
