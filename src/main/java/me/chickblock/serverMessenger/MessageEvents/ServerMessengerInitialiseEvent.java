@@ -1,7 +1,6 @@
-package me.chickblock.serverMessenger;
+package me.chickblock.serverMessenger.MessageEvents;
 
-import com.velocitypowered.api.event.ResultedEvent;
-import com.velocitypowered.api.event.ResultedEvent.GenericResult;
+import me.chickblock.serverMessenger.ServerMessenger;
 
 
 public class ServerMessengerInitialiseEvent {

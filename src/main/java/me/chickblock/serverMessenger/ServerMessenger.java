@@ -9,14 +9,16 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.PluginManager;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.chickblock.serverMessenger.MessageCommands.MessageCommand;
-import me.chickblock.serverMessenger.MessageCommands.PluginMessage;
+import me.chickblock.serverMessenger.MessageEvents.PluginMessage;
+import me.chickblock.serverMessenger.MessageEvents.ServerMessengerInitialiseEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
+
+import java.util.Arrays;
 
 
 @Plugin(
@@ -43,8 +45,12 @@ public class ServerMessenger {
     public void onProxyInitialization(ProxyInitializeEvent event) {
         logger.info("Starting server messenger...");
         server.getChannelRegistrar().register(IDENTIFIER);
+        logger.info("Initialising Event Class Registry...");
+        EventClassRegistry.init(logger);
         pluginManager = server.getPluginManager();
+        logger.info("Initialising Response Handler...");
         ResponseHandler.init(logger, server.getEventManager());
+
         server.getEventManager().fire(new ServerMessengerInitialiseEvent(this));
         logger.info("Server messenger has successfully started.");
 

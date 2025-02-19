@@ -1,6 +1,5 @@
 package me.chickblock.serverMessenger.MessageEvents;
 
-import me.chickblock.serverMessenger.MessageCommands.PluginMessage;
 import org.jetbrains.annotations.NotNull;
 
 public class ServerMessengerEvent{

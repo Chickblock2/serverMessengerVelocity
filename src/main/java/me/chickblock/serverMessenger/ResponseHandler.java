@@ -8,7 +8,6 @@ import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
-import me.chickblock.serverMessenger.MessageEvents.EventClassRegistry;
 import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
