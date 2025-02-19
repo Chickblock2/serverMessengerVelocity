@@ -1,27 +1,22 @@
 package me.chickblock.serverMessenger;
 
 
-import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
-import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Plugin;
-import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.plugin.PluginManager;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.ServerConnection;
+import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.chickblock.serverMessenger.MessageCommands.MessageCommand;
-import me.chickblock.serverMessenger.MessageEvents.EventClassRegistry;
-import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
+import me.chickblock.serverMessenger.MessageCommands.PluginMessage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
-
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
 
 
 @Plugin(
@@ -31,80 +26,97 @@ import java.io.IOException;
 )
 public class ServerMessenger {
     public final static String PLUGIN_MESSAGING_CHANNEL = "servermessenger";
+    public static final MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.from("servermessenger:main");
+    private static Logger logger;
+    private static PluginManager pluginManager;
     private final ProxyServer server;
-    private final Logger logger;
-    private static MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.from("servermessenger:main");
+
 
     @Inject
     public ServerMessenger(ProxyServer server, Logger logger){
         this.server = server;
-        this.logger = logger;
+        ServerMessenger.logger = logger;
     }
+
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
         logger.info("Starting server messenger...");
         server.getChannelRegistrar().register(IDENTIFIER);
+        pluginManager = server.getPluginManager();
+        ResponseHandler.init(logger, server.getEventManager());
+        server.getEventManager().fire(new ServerMessengerInitialiseEvent(this));
         logger.info("Server messenger has successfully started.");
+
     }
 
-    @Subscribe
-    public void onPluginMessageFromBackend(PluginMessageEvent event){
-        if(!IDENTIFIER.equals(event.getIdentifier())){
-            return;
-        }else{
-            event.setResult(PluginMessageEvent.ForwardResult.handled());
+    protected static PluginManager getPluginManager() {
+        return pluginManager;
+    }
+
+    protected static Logger getLogger() {
+        return logger;
+    }
+
+    public static @Nullable PluginMessage composeMessage(int messageCommandRegistryID, @NotNull String messageContents){
+        MessageCommand command = MessageCommandRegistry.getCommandFromId(messageCommandRegistryID);
+        if(command == null){
+            logger.warn("Received a request to compose a message for a command registry ID that does not exist.");
+            return null;
         }
-
-        if(event.getSource() instanceof Player player){
-            logger.warn("Received plugin message originating from a player. This may indicate a player is attempting to spoof messages to the proxy.\nPlayer name: " + player.getUsername() + "(" + player.getUniqueId() + ")");
-        }else if(event.getSource() instanceof ServerConnection){
-            ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
-            String subchannel = in.readUTF();
-            if (subchannel.equals(ServerMessenger.PLUGIN_MESSAGING_CHANNEL)) {
-                short len = in.readShort();
-                byte[] msgbytes = new byte[len];
-                in.readFully(msgbytes);
-
-                DataInputStream msgIn = new DataInputStream(new ByteArrayInputStream(msgbytes));
-                String keyWord;
-                boolean requiresResponse;
-                String pluginID;
-                String messageContents;
-                ServerMessengerEvent SMEvent;
-                Plugin plugin;
-                Object eventToFire;
-                try {
-                    keyWord = msgIn.readUTF(); // Read the data in the same way you wrote it
-                    requiresResponse = msgIn.readBoolean();
-                    pluginID = msgIn.readUTF();
-                    messageContents = msgIn.readUTF();
-                    // Check for registered plugin to fire event for.
-                    plugin = EventClassRegistry.findPluginFromID(pluginID);
-                    if(plugin != null){
-                        eventToFire = EventClassRegistry.getEventFromPlugin(plugin);
-                    }else{
-                        eventToFire = new ServerMessengerEvent(keyWord, pluginID, requiresResponse, messageContents);
-                    }
-                    server.getEventManager().fire(eventToFire).thenAccept((returnedEvent) -> {
-                        // TODO: handle response
-                    });
-                } catch (IOException e) {
-                    logger.warn("Received malformed packet data from server: " + ((ServerConnection) event.getSource()).getServer().toString() + " This could be the result of a buggy plugin on that server.");
-                }
+        boolean requiresResponse;
+        boolean noReply;
+        requiresResponse = switch (command.getResponseType()) {
+            case VOID -> {
+                noReply = true;
+                yield false;
             }
-        }
+            case OPTIONAL -> {
+                noReply = false;
+                yield false;
+            }
+            case REQUIRED -> {
+                noReply = false;
+                yield true;
+            }
+        };
+        return new PluginMessage(command.getCommandKeyWord(), requiresResponse, noReply, messageContents, command.getRegisteredPlugin().id());
     }
 
-    public boolean sendMessage(@NotNull RegisteredServer server, int messageCommandRegistryID, @NotNull String messageContents){
-        return false;
+    public static PluginMessage composeMessage(@NotNull MessageCommand command, @NotNull String messageContents){
+        if(!MessageCommandRegistry.commandIDIsValid(command.getRegistryID())){
+            logger.warn("A plugin is attempting to compose a message with an unregistered command, this is unsupported behavior and likely means the plugin owner is not properly using Server Messenger.");
+        }
+        boolean requiresResponse;
+        boolean noReply;
+        requiresResponse = switch (command.getResponseType()) {
+            case VOID -> {
+                noReply = true;
+                yield false;
+            }
+            case OPTIONAL -> {
+                noReply = false;
+                yield false;
+            }
+            case REQUIRED -> {
+                noReply = false;
+                yield true;
+            }
+        };
+        return new PluginMessage(command.getCommandKeyWord(), requiresResponse, noReply, messageContents, command.getRegisteredPlugin().id());
+
     }
 
-    public boolean sendMessage(@NotNull RegisteredServer server, MessageCommand messageCommand, @NotNull String messageContents){
-        if(!MessageCommandRegistry.commandIDIsValid(messageCommand.getRegistryID())){
-            logger.warn("A plugin is attempting to send an unregistered command, this is unsupported behavior and likely means the plugin owner is not properly using Server Messenger.");
-        }
-        return false;
+    public static boolean sendMessage(@NotNull RegisteredServer destinationServer, @NotNull PluginMessage message){
+        byte[] data;
+        ByteArrayDataOutput in = ByteStreams.newDataOutput();
+        in.write(message.keyWord());
+        in.writeBoolean(message.requiresResponse());
+        in.writeBoolean(message.voidReply());
+        in.writeUTF(message.pluginID());
+        in.writeUTF(message.messageContents());
+        data = in.toByteArray();
+        return destinationServer.sendPluginMessage(IDENTIFIER, data);
     }
 
 

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 public class MessageCommandRegistry {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(MessageCommandRegistry.class);
@@ -14,8 +14,22 @@ public class MessageCommandRegistry {
     private static Logger logger;
     private static int idCount = -1;
     private static final List<Integer> idRegistry = new ArrayList<Integer>();
+    private static boolean initialise = false;
+
+    protected static void init(org.slf4j.Logger logger){
+        if(initialise){
+            return;
+        }
+        MessageCommandRegistry.logger = logger;
+        MessageCommandRegistry.initialise = true;
+    }
 
     public static boolean registerCommand(@NotNull MessageCommand command){
+        if(!initialise){
+            log.warn("A plugin is attempting to register a Message Command before the registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            return false;
+        }
+
         for(MessageCommand reg: commandRegistry){
             if(reg.equals(command)){
                 log.warn("A message command has already been registered with the following parameters: " + command.toString() + " unable to complete registry.");
@@ -31,14 +45,23 @@ public class MessageCommandRegistry {
     }
 
     protected static List<MessageCommand> getMessageCommandRegistry(){
+        if(!initialise){
+            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access message command registry before registry has been initialised. This should not happen.");
+        }
         return commandRegistry;
     }
 
     protected static List<Integer> getIdRegistry(){
+        if(!initialise){
+            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access message command registry before registry has been initialised. This should not happen.");
+        }
         return idRegistry;
     }
 
     protected static boolean removeMessageCommand(@NotNull MessageCommand command){
+        if(!initialise){
+            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access message command registry before registry has been initialised. This should not happen.");
+        }
         log.warn("Attempting to deregister message command: " + command.getName() + ". This is NOT supported behavior and may cause problems if a message is in transit.");
         int index = commandRegistry.indexOf(command);
         if(index >= 0){
@@ -50,6 +73,10 @@ public class MessageCommandRegistry {
     }
 
     protected static boolean removeMessageCommand(int registryIndex){
+        if(!initialise){
+            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access message command registry before registry has been initialised. This should not happen.");
+        }
+
         log.warn("Attempting to deregister message command at index of: '" + registryIndex + "' in the registry. This is NOT supported behavior and may cause problems if a message is in transit.");
         try{
             commandRegistry.remove(registryIndex);
@@ -62,10 +89,19 @@ public class MessageCommandRegistry {
     }
 
     public static int getMessageCommandIndex(MessageCommand command){
+        if(!initialise){
+            log.warn("A plugin is attempting to register a Message Command before the registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            return -1;
+        }
         return commandRegistry.indexOf(command);
     }
 
     public static int getIdOfCommand(MessageCommand command){
+        if(!initialise){
+            log.warn("A plugin is attempting to register a Message Command before the registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            return -1;
+        }
+
         int index = getMessageCommandIndex(command);
         if(index >= 0){
             return idRegistry.get(index);
@@ -75,6 +111,11 @@ public class MessageCommandRegistry {
     }
 
     public static @Nullable MessageCommand getCommandFromIndex(int i){
+        if(!initialise){
+            log.warn("A plugin is attempting to register a Message Command before the registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            return null;
+        }
+
         try{
             return commandRegistry.get(i);
         }catch(IndexOutOfBoundsException e){
@@ -84,6 +125,11 @@ public class MessageCommandRegistry {
     }
 
     public static @Nullable MessageCommand getCommandFromId(int i){
+        if(!initialise){
+            log.warn("A plugin is attempting to register a Message Command before the registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            return null;
+        }
+
         if(idRegistry.contains(i)){
             return commandRegistry.get(getIndexOfId(i));
         }else{
@@ -92,15 +138,30 @@ public class MessageCommandRegistry {
     }
 
     public static boolean commandIsInRegistry(MessageCommand command){
+        if(!initialise){
+            log.warn("A plugin is attempting to register a Message Command before the registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            return false;
+        }
         return commandRegistry.contains(command);
     }
 
     public static boolean commandIDIsValid(int i){
+        if(!initialise){
+            log.warn("A plugin is attempting to register a Message Command before the registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            return false;
+        }
         return i >= 0 && i <= idCount;
     }
 
     protected static int getIndexOfId(int i){
+        if(!initialise){
+            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access message command registry before registry has been initialised. This should not happen.");
+        }
         return idRegistry.indexOf(i);
+    }
+
+    public static boolean isInitialise() {
+        return initialise;
     }
 
 }

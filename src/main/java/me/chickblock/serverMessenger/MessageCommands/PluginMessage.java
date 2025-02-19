@@ -1,5 +1,5 @@
 package me.chickblock.serverMessenger.MessageCommands;
 
 
-public record PluginMessage(String keyWord, boolean requiresResponse, String messageContents, String pluginID) {
+public record PluginMessage(byte[] keyWord, boolean requiresResponse, boolean voidReply, String messageContents, String pluginID) {
 }
