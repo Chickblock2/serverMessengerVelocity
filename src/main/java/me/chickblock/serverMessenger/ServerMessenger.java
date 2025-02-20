@@ -34,7 +34,7 @@ public class ServerMessenger {
     @Inject
     private ServerMessenger(ProxyServer SERVER, Logger logger){
         this.SERVER = SERVER;
-        ServerMessenger.logger = logger;
+        this.logger = logger;
     }
 
 
