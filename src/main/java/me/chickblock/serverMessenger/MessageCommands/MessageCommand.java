@@ -1,7 +1,6 @@
 package me.chickblock.serverMessenger.MessageCommands;
 
 import com.velocitypowered.api.plugin.Plugin;
-import me.chickblock.serverMessenger.MessageEvents.PluginMessage;
 import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -80,7 +79,7 @@ public class MessageCommand {
         this.registryID = i;
     }
 
-    public PluginMessage generatePluginMessageListener(){
+    public ServerMessengerEvent generateListenerEvent(){
         boolean responseRequired;
         boolean voidReply = switch (responseType) {
             case REQUIRED -> {
@@ -96,6 +95,6 @@ public class MessageCommand {
                 yield true;
             }
         };
-        return new ServerMessengerEvent(commandKeyWord, registeredPlugin.id(), responseRequired, voidReply);
+        return new ServerMessengerEvent(Arrays.toString(commandKeyWord), registeredPlugin.id(), responseRequired, voidReply);
     }
 }

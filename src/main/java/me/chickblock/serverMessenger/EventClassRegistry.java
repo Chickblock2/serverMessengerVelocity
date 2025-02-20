@@ -6,7 +6,6 @@ import me.chickblock.serverMessenger.MessageEvents.ServerMessengerInitialiseEven
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
-
 import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 

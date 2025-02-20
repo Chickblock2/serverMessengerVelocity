@@ -3,10 +3,10 @@ package me.chickblock.serverMessenger.MessageEvents;
 import org.jetbrains.annotations.NotNull;
 
 public class ServerMessengerEvent{
-    private String keyWord;
-    private String pluginID;
-    private boolean requireResponse;
-    private boolean voidReply;
+    private final String keyWord;
+    private final String pluginID;
+    private final boolean requireResponse;
+    private final boolean voidReply;
     private String messageContents;
     private PluginMessage replyMessage = null;
     private int messageEventRegistryID = -1;
@@ -39,6 +39,10 @@ public class ServerMessengerEvent{
         return requireResponse;
     }
 
+    public boolean isVoidReply() {
+        return voidReply;
+    }
+
     public String getMessageContents() {
         return messageContents;
     }
@@ -60,11 +64,12 @@ public class ServerMessengerEvent{
     }
 
     // For overriding in extended (private) classes
-    // False discontinues built-callback execution (no reply message)
+    // False discontinues built-in callback execution (no reply message)
     // True continues built-in callback execution (reply message)
     public boolean callBackFunction(){
         return true;
     }
+
 
 }
 
