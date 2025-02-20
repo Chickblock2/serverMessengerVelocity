@@ -2,9 +2,9 @@ package me.chickblock.serverMessenger.MessageCommands;
 
 import com.velocitypowered.api.plugin.Plugin;
 import me.chickblock.serverMessenger.MessageEvents.PluginMessage;
+import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -81,10 +81,21 @@ public class MessageCommand {
     }
 
     public PluginMessage generatePluginMessageListener(){
-        if(responseType == ResponseType.REQUIRED){
-            boolean responseRequired = true;
-        }
-        return null;
-        //return new ServerMessengerEvent(commandKeyWord, registeredPlugin.id(), responseRequired, );
+        boolean responseRequired;
+        boolean voidReply = switch (responseType) {
+            case REQUIRED -> {
+                responseRequired = true;
+                yield false;
+            }
+            case OPTIONAL -> {
+                responseRequired = false;
+                yield false;
+            }
+            case VOID -> {
+                responseRequired = false;
+                yield true;
+            }
+        };
+        return new ServerMessengerEvent(commandKeyWord, registeredPlugin.id(), responseRequired, voidReply);
     }
 }

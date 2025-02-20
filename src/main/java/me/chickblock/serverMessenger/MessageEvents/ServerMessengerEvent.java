@@ -11,7 +11,14 @@ public class ServerMessengerEvent{
     private PluginMessage replyMessage = null;
     private int messageEventRegistryID = -1;
 
-    public ServerMessengerEvent(@NotNull String keyWord, @NotNull String pluginID, boolean requireResponse, @NotNull boolean voidReply, @NotNull String messageContents){
+    public ServerMessengerEvent(@NotNull String keyWord, @NotNull String pluginID, boolean requireResponse, boolean voidReply){
+        this.keyWord = keyWord;
+        this.pluginID = pluginID;
+        this.requireResponse = requireResponse;
+        this.voidReply = voidReply;
+    }
+
+    public ServerMessengerEvent(@NotNull String keyWord, @NotNull String pluginID, boolean requireResponse, boolean voidReply, @NotNull String messageContents){
         this.keyWord = keyWord;
         this.pluginID = pluginID;
         this.requireResponse = requireResponse;

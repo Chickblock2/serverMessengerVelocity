@@ -5,7 +5,7 @@ import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
 import me.chickblock.serverMessenger.MessageEvents.ServerMessengerInitialiseEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.UnexpectedException;
 import java.util.ArrayList;
@@ -17,13 +17,12 @@ public class EventClassRegistry {
     private static int idCount = -1;
     private static boolean initialise = false;
     private static boolean active = false;
-    private static Logger logger;
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(EventClassRegistry.class);
 
-    protected static void init(org.slf4j.Logger logger){
+    protected static void init(){
         if(initialise){
             return;
         }
-        EventClassRegistry.logger = logger;
         EventClassRegistry.initialise = true;
     }
 
@@ -37,9 +36,10 @@ public class EventClassRegistry {
 
     }
 
+    // Registry Access Methods - PUBLIC
     public boolean registerEvent(Object eventToRegister, Plugin plugin){
         if(!active){
-            logger.warn("A plugin is attempting to interact with the Event Class Registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            log.warn("A plugin is attempting to interact with the Event Class Registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
             return false;
         }
         if(eventClassRegistry.contains(eventToRegister) || eventToRegister.getClass().isAssignableFrom(ServerMessengerEvent.class)){
@@ -53,23 +53,13 @@ public class EventClassRegistry {
         }
     }
 
-    protected static ArrayList<Object> getEventClassRegistry() {
-        if(!initialise){
-            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access event class registry before registry has been initialised. This should not happen.");
-        }
-        return eventClassRegistry;
-    }
-
-    protected static ArrayList<Integer> getIdList() {
-        if(!initialise){
-            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access event class registry before registry has been initialised. This should not happen.");
-        }
-        return idList;
+    public static boolean isActive(){
+        return active;
     }
 
     public static int getIndexOfPlugin(Plugin plugin){
         if(!active){
-            logger.warn("A plugin is attempting to interact with the Event Class Registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            log.warn("A plugin is attempting to interact with the Event Class Registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
             return -1;
         }
         return(registeredPlugin.indexOf(plugin));
@@ -77,7 +67,7 @@ public class EventClassRegistry {
 
     public static @Nullable Plugin findPluginFromID(@NotNull String pluginId){
         if(!active){
-            logger.warn("A plugin is attempting to interact with the Event Class Registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            log.warn("A plugin is attempting to interact with the Event Class Registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
             return null;
         }
         if(pluginId.isBlank()){
@@ -94,7 +84,7 @@ public class EventClassRegistry {
 
     public static @Nullable Object getEventFromPlugin(Plugin plugin){
         if(!active){
-            logger.warn("A plugin is attempting to interact with the Event Class Registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            log.warn("A plugin is attempting to interact with the Event Class Registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
             return null;
         }
         try{
@@ -105,13 +95,25 @@ public class EventClassRegistry {
 
     }
 
+    // Registry management Methods - INTERNAL USE ONLY
     protected static boolean isInitialised() {
         return initialise;
     }
 
-    public static boolean isActive(){
-        return active;
+    protected static ArrayList<Object> getEventClassRegistry() {
+        if(!initialise){
+            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access event class registry before registry has been initialised. This should not happen.");
+        }
+        return eventClassRegistry;
     }
+
+    protected static ArrayList<Integer> getIdList() {
+        if(!initialise){
+            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access event class registry before registry has been initialised. This should not happen.");
+        }
+        return idList;
+    }
+
 
 
 }

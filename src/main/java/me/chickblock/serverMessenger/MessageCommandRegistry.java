@@ -10,23 +10,20 @@ import org.slf4j.LoggerFactory;
 import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
 
 public class MessageCommandRegistry {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(MessageCommandRegistry.class);
     private static final List<MessageCommand> commandRegistry = new ArrayList<MessageCommand>();
-    private static Logger logger;
     private static int idCount = -1;
     private static final List<Integer> idRegistry = new ArrayList<Integer>();
     private static boolean initialise = false;
     private static boolean active = false;
 
     // Initialisation/Activation of Registry
-    protected static void init(org.slf4j.Logger logger){
+    protected static void init(){
         if(initialise){
             return;
         }
-        MessageCommandRegistry.logger = logger;
         MessageCommandRegistry.initialise = true;
     }
 
@@ -40,72 +37,7 @@ public class MessageCommandRegistry {
 
     }
 
-    // Registry Access Commands - Public use
-    public static int getMessageCommandIndex(MessageCommand command){
-        if(!active){
-            log.warn("A plugin is attempting to register a Message Command before the registry has been activated. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
-            return -1;
-        }
-        return commandRegistry.indexOf(command);
-    }
-
-    public static int getIdOfCommand(MessageCommand command){
-        if(!active){
-            log.warn("A plugin is attempting to register a Message Command before the registry has been activated. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
-            return -1;
-        }
-
-        int index = getMessageCommandIndex(command);
-        if(index >= 0){
-            return idRegistry.get(index);
-        }else{
-            return -1;
-        }
-    }
-
-    public static @Nullable MessageCommand getCommandFromIndex(int i){
-        if(!active){
-            log.warn("A plugin is attempting to register a Message Command before the registry has been activated. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
-            return null;
-        }
-
-        try{
-            return commandRegistry.get(i);
-        }catch(IndexOutOfBoundsException e){
-            log.warn("Unable to find a registered message command at index of: '" + i +"'");
-            return null;
-        }
-    }
-
-    public static @Nullable MessageCommand getCommandFromId(int i){
-        if(!active){
-            log.warn("A plugin is attempting to register a Message Command before the registry has been activated. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
-            return null;
-        }
-
-        if(idRegistry.contains(i)){
-            return commandRegistry.get(getIndexOfId(i));
-        }else{
-            return null;
-        }
-    }
-
-    public static boolean commandIsInRegistry(MessageCommand command){
-        if(!active){
-            log.warn("A plugin is attempting to register a Message Command before the registry has been activated. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
-            return false;
-        }
-        return commandRegistry.contains(command);
-    }
-
-    public static boolean commandIDIsValid(int i){
-        if(!active){
-            log.warn("A plugin is attempting to register a Message Command before the registry has been active. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
-            return false;
-        }
-        return i >= 0 && i <= idCount;
-    }
-
+    // Registry Access Methods - Public use
     public static boolean registerCommand(@NotNull MessageCommand command){
         if(!active){
             log.warn("A plugin is attempting to register a Message Command before the registry has been activated. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
@@ -126,6 +58,49 @@ public class MessageCommandRegistry {
         return true;
     }
 
+    public static int getIdOfCommand(MessageCommand command){
+        if(!active){
+            log.warn("A plugin is attempting to register a Message Command before the registry has been activated. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            return -1;
+        }
+
+        int index = commandRegistry.indexOf(command);
+        if(index >= 0){
+            return idRegistry.get(index);
+        }else{
+            return -1;
+        }
+    }
+
+    public static @Nullable MessageCommand getCommandFromId(int i){
+        if(!active){
+            log.warn("A plugin is attempting to register a Message Command before the registry has been activated. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            return null;
+        }
+
+        if(idRegistry.contains(i)){
+            return commandRegistry.get(idRegistry.indexOf(i));
+        }else{
+            return null;
+        }
+    }
+
+    public static boolean commandIsInRegistry(MessageCommand command){
+        if(!active){
+            log.warn("A plugin is attempting to register a Message Command before the registry has been activated. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            return false;
+        }
+        return commandRegistry.contains(command);
+    }
+
+    public static boolean commandIDIsValid(int i){
+        if(!active){
+            log.warn("A plugin is attempting to register a Message Command before the registry has been active. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
+            return false;
+        }
+        return (i >= 0 && i <= idCount);
+    }
+
     public static boolean isActive(){
         return isActive();
     }
@@ -143,43 +118,6 @@ public class MessageCommandRegistry {
             throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access message command registry before registry has been initialised. This should not happen.");
         }
         return idRegistry;
-    }
-
-    protected static boolean removeMessageCommand(@NotNull MessageCommand command){
-        if(!initialise){
-            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access message command registry before registry has been initialised. This should not happen.");
-        }
-        log.warn("Attempting to deregister message command: " + command.getName() + ". This is NOT supported behavior and may cause problems if a message is in transit.");
-        int index = commandRegistry.indexOf(command);
-        if(index >= 0){
-            idRegistry.remove(index);
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    protected static boolean removeMessageCommand(int registryIndex){
-        if(!initialise){
-            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access message command registry before registry has been initialised. This should not happen.");
-        }
-
-        log.warn("Attempting to deregister message command at index of: '" + registryIndex + "' in the registry. This is NOT supported behavior and may cause problems if a message is in transit.");
-        try{
-            commandRegistry.remove(registryIndex);
-            idRegistry.remove(registryIndex);
-            return true;
-        }catch(IndexOutOfBoundsException e){
-            log.warn("Unable to degister message command at index of: '" + registryIndex + "' in the registry. This means that no message command has been registered at this position.");
-            return false;
-        }
-    }
-
-    protected static int getIndexOfId(int i){
-        if(!initialise){
-            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access message command registry before registry has been initialised. This should not happen.");
-        }
-        return idRegistry.indexOf(i);
     }
 
     protected static boolean isInitialise() {

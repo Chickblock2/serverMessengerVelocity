@@ -12,27 +12,40 @@ import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.rmi.UnexpectedException;
+import me.chickblock.serverMessenger.MessageEvents.ServerMessengerInitialiseEvent;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResponseHandler {
-    private static Logger logger;
-    private static boolean initialise = false;
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(ResponseHandler.class);
     private static EventManager eventManager;
+    private static boolean initialise = false;
+    private static boolean active = false;
 
-    protected static void init(Logger logger, EventManager eventManager){
+
+    protected static void init(EventManager eventManager){
         if(initialise){
             return;
         }
-        ResponseHandler.logger = logger;
         ResponseHandler.eventManager = eventManager;
         initialise = true;
     }
 
     @Subscribe
+    private void onServerMessengerInitialised(ServerMessengerInitialiseEvent event) throws UnexpectedException {
+        if(initialise){
+            active = true;
+        }else{
+            throw new UnexpectedException("FATAL ERROR: Somehow the ServerMessengerInitialiseEvent was thrown before the Event Class Registry was fully initialised. This should NEVER happen.");
+        }
+
+    }
+
+    @Subscribe
     public static void onPluginMessageFromBackend(@NotNull PluginMessageEvent event){
-        if(!initialise){
-            return; // Ignore packets sent during initialisation
+        if(!active){
+            return;
         }
         if(!ServerMessenger.IDENTIFIER.equals(event.getIdentifier())){
             return;
@@ -41,7 +54,7 @@ public class ResponseHandler {
         }
 
         if(event.getSource() instanceof Player player){
-            logger.warn("Received plugin message originating from a player. This may indicate a player is attempting to spoof messages to the proxy.\nPlayer name: " + player.getUsername() + "(" + player.getUniqueId() + ")");
+            log.warn("Received plugin message originating from a player. This may indicate a player is attempting to spoof messages to the proxy.\nPlayer name: " + player.getUsername() + "(" + player.getUniqueId() + ")");
         }else if(event.getSource() instanceof ServerConnection){
             ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
             String subchannel = in.readUTF();
@@ -83,18 +96,22 @@ public class ResponseHandler {
                             return;
                         }
                         if(requiresResponse && !messageHasBeenRepliedTo){
-                            logger.warn("A received packet required a response but no response was sent, this may cause problems on the backend server.");
+                            log.warn("A received packet required a response but no response was sent, this may cause problems on the backend server.");
                         }
 
                     });
                 } catch (IOException e) {
-                    logger.warn("Received malformed packet data from server: " + ((ServerConnection) event.getSource()).getServer().toString() + " This could be the result of a buggy plugin on that server.");
+                    log.warn("Received malformed packet data from server: " + ((ServerConnection) event.getSource()).getServer().toString() + " This could be the result of a buggy plugin on that server.");
                 }
             }
         }
     }
 
-    public static boolean isInitialise() {
+    public static boolean isActive() {
+        return active;
+    }
+
+    protected static  boolean isInitialise(){
         return initialise;
     }
 }
