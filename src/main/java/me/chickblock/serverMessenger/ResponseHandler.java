@@ -26,7 +26,7 @@ public class ResponseHandler {
 
 
 
-    protected void init(EventManager eventManager){
+    protected static void init(EventManager eventManager){
         if(initialise){
             return;
         }

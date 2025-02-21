@@ -50,7 +50,7 @@ public class ServerMessenger {
         logger.info("Initialising Packet Listener...");
         ResponseHandler.init(eventManager);
         logger.info("All modules initialised, activating registries and and packet listener...");
-        eventManager.fire(new ServerMessengerInitialiseEvent(this));
+        eventManager.fire(new ServerMessengerInitialiseEvent(this, getMessageCommandRegistry(), getEventClassRegistry()));
         logger.info("Server messenger has successfully started.");
         logger.info("Now listening for packets sent on the " + PLUGIN_MESSAGING_CHANNEL + " channel.");
         logger.info("Registries are now open for operational use.");
@@ -60,7 +60,7 @@ public class ServerMessenger {
         return new EventClassRegistry();
     }
 
-    public MessageCommandRegistry messageCommandRegistry() {
+    public MessageCommandRegistry getMessageCommandRegistry() {
         return new MessageCommandRegistry();
     }
 
@@ -86,7 +86,7 @@ public class ServerMessenger {
                 yield true;
             }
         };
-        return new PluginMessage(command.getCommandKeyWord(), requiresResponse, noReply, messageContents, command.getRegisteredPlugin().id());
+        return new PluginMessage(command.getCommandKeyWord(), requiresResponse, noReply, messageContents, command.getRegisteredPlugin().getDescription().getId());
     }
 
     @Contract("_, _ -> new")
@@ -110,7 +110,7 @@ public class ServerMessenger {
                 yield true;
             }
         };
-        return new PluginMessage(command.getCommandKeyWord(), requiresResponse, noReply, messageContents, command.getRegisteredPlugin().id());
+        return new PluginMessage(command.getCommandKeyWord(), requiresResponse, noReply, messageContents, command.getRegisteredPlugin().getDescription().getId());
     }
 
     public static boolean sendMessage(@NotNull RegisteredServer destinationServer, @NotNull PluginMessage message){

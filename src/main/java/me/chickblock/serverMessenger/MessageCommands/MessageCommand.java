@@ -1,6 +1,7 @@
 package me.chickblock.serverMessenger.MessageCommands;
 
 import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.PluginContainer;
 import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,11 +13,11 @@ public class MessageCommand {
     private final byte[] commandKeyWord;
     private final SendType sendType;
     private final ResponseType responseType;
-    private final Plugin registeredPlugin;
+    private final PluginContainer registeredPlugin;
     private int registryID = -1;
 
 
-    public MessageCommand(@Nullable String commandTypeName, @NotNull String commandKeyWord, @NotNull SendType sendType, @NotNull ResponseType responseType, @NotNull Plugin registeringPlugin){
+    public MessageCommand(@Nullable String commandTypeName, @NotNull String commandKeyWord, @NotNull SendType sendType, @NotNull ResponseType responseType, @NotNull PluginContainer registeringPlugin){
         if(commandKeyWord.isBlank()){
             throw new IllegalArgumentException("Command word cannot be blank.");
         }
@@ -44,7 +45,7 @@ public class MessageCommand {
     }
 
 
-    public Plugin getRegisteredPlugin() {
+    public PluginContainer getRegisteredPlugin() {
         return registeredPlugin;
     }
 
@@ -95,6 +96,6 @@ public class MessageCommand {
                 yield true;
             }
         };
-        return new ServerMessengerEvent(Arrays.toString(commandKeyWord), registeredPlugin.id(), responseRequired, voidReply);
+        return new ServerMessengerEvent(Arrays.toString(commandKeyWord), registeredPlugin.getDescription().getId(), responseRequired, voidReply);
     }
 }
