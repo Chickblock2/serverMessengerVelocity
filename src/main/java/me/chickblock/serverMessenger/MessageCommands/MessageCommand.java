@@ -13,11 +13,11 @@ public class MessageCommand {
     private final byte[] commandKeyWord;
     private final SendType sendType;
     private final ResponseType responseType;
-    private final PluginContainer registeredPlugin;
+    private final Plugin registeredPlugin;
     private int registryID = -1;
 
 
-    public MessageCommand(@Nullable String commandTypeName, @NotNull String commandKeyWord, @NotNull SendType sendType, @NotNull ResponseType responseType, @NotNull PluginContainer registeringPlugin){
+    public MessageCommand(@Nullable String commandTypeName, @NotNull String commandKeyWord, @NotNull SendType sendType, @NotNull ResponseType responseType, @NotNull Plugin registeringPlugin){
         if(commandKeyWord.isBlank()){
             throw new IllegalArgumentException("Command word cannot be blank.");
         }
@@ -45,7 +45,7 @@ public class MessageCommand {
     }
 
 
-    public PluginContainer getRegisteredPlugin() {
+    public Plugin getRegisteredPlugin() {
         return registeredPlugin;
     }
 
@@ -96,6 +96,6 @@ public class MessageCommand {
                 yield true;
             }
         };
-        return new ServerMessengerEvent(Arrays.toString(commandKeyWord), registeredPlugin.getDescription().getId(), responseRequired, voidReply);
+        return new ServerMessengerEvent(Arrays.toString(commandKeyWord), registeredPlugin.id(), responseRequired, voidReply);
     }
 }

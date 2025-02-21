@@ -86,7 +86,7 @@ public class ServerMessenger {
                 yield true;
             }
         };
-        return new PluginMessage(command.getCommandKeyWord(), requiresResponse, noReply, messageContents, command.getRegisteredPlugin().getDescription().getId());
+        return new PluginMessage(command.getCommandKeyWord(), requiresResponse, noReply, messageContents, command.getRegisteredPlugin().id());
     }
 
     @Contract("_, _ -> new")
@@ -110,7 +110,7 @@ public class ServerMessenger {
                 yield true;
             }
         };
-        return new PluginMessage(command.getCommandKeyWord(), requiresResponse, noReply, messageContents, command.getRegisteredPlugin().getDescription().getId());
+        return new PluginMessage(command.getCommandKeyWord(), requiresResponse, noReply, messageContents, command.getRegisteredPlugin().id());
     }
 
     public static boolean sendMessage(@NotNull RegisteredServer destinationServer, @NotNull PluginMessage message){
