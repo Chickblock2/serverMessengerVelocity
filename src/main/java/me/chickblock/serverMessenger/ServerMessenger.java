@@ -56,11 +56,13 @@ public class ServerMessenger {
         logger.info("Registries are now open for operational use.");
     }
 
-    public EventClassRegistry getEventClassRegistry(){
+    @Contract(value = " -> new", pure = true)
+    public static @NotNull EventClassRegistry getEventClassRegistry(){
         return new EventClassRegistry();
     }
 
-    public MessageCommandRegistry getMessageCommandRegistry() {
+    @Contract(value = " -> new", pure = true)
+    public static @NotNull MessageCommandRegistry getMessageCommandRegistry() {
         return new MessageCommandRegistry();
     }
 
