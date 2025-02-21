@@ -1,4 +1,0 @@
-Here's how this here plugin works:
-
-1. Allows other plugins to create MessageCommand objects representing different commands that can be sent to other servers.
-2. Once a plugin creates a MessageCommand object it must register it with our plugin

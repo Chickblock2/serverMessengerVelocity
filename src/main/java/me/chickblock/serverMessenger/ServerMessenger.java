@@ -56,6 +56,14 @@ public class ServerMessenger {
         logger.info("Registries are now open for operational use.");
     }
 
+    public EventClassRegistry getEventClassRegistry(){
+        return new EventClassRegistry();
+    }
+
+    public MessageCommandRegistry messageCommandRegistry() {
+        return new MessageCommandRegistry();
+    }
+
     public static @Nullable PluginMessage composeMessage(int messageCommandRegistryID, @NotNull String messageContents){
         MessageCommand command = MessageCommandRegistry.getCommandFromId(messageCommandRegistryID);
         if(command == null){

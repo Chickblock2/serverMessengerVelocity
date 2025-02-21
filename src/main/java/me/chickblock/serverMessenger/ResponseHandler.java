@@ -15,16 +15,18 @@ import java.io.IOException;
 import java.rmi.UnexpectedException;
 import me.chickblock.serverMessenger.MessageEvents.ServerMessengerInitialiseEvent;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ResponseHandler {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(ResponseHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(ResponseHandler.class);
     private static EventManager eventManager;
     private static boolean initialise = false;
     private static boolean active = false;
 
 
-    protected static void init(EventManager eventManager){
+
+    protected void init(EventManager eventManager){
         if(initialise){
             return;
         }
@@ -43,7 +45,7 @@ public class ResponseHandler {
     }
 
     @Subscribe
-    public static void onPluginMessageFromBackend(@NotNull PluginMessageEvent event){
+    private static void onPluginMessageFromBackend(@NotNull PluginMessageEvent event){
         if(!active){
             return;
         }
