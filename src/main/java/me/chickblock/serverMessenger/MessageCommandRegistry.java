@@ -49,7 +49,7 @@ public class MessageCommandRegistry {
                 return false;
             }
         }
-        log.info("Registering new Server Messenger command from plugin: " + command.getRegisteredPlugin().getDescription().getName());
+        log.info("Registering new Server Messenger command from plugin: " + command.getRegisteredPlugin().name());
         idCount++;
         command.setRegistryID(idCount);
         idRegistry.add(idCount);
