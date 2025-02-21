@@ -4,7 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ae515e3e-c255-4c71-bcd6-7525848ec8a6" name="Changes" comment="" />
+    <list default="true" id="ae515e3e-c255-4c71-bcd6-7525848ec8a6" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gradle/8.10/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.10/executionHistory/executionHistory.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.10/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.10/executionHistory/executionHistory.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.10/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.10/fileHashes/fileHashes.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.10/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.10/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/me/chickblock/serverMessenger/ServerMessenger.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/me/chickblock/serverMessenger/ServerMessenger.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/libs/serverMessengerVelocity-0.0.1.jar" beforeDir="false" afterPath="$PROJECT_DIR$/build/libs/serverMessengerVelocity-0.0.1.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -128,7 +138,7 @@
       <recent name="me.chickblock.serverMessenger" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.serverMessengerVelocity [jar]">
+  <component name="RunManager" selected="Gradle.serverMessengerVelocity [build]">
     <configuration name="serverMessengerVelocity [buildNeeded]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -239,8 +249,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.serverMessengerVelocity [jar]" />
         <item itemvalue="Gradle.serverMessengerVelocity [build]" />
+        <item itemvalue="Gradle.serverMessengerVelocity [jar]" />
         <item itemvalue="Gradle.serverMessengerVelocity" />
         <item itemvalue="Gradle.serverMessengerVelocity [dependencies]" />
         <item itemvalue="Gradle.serverMessengerVelocity [buildNeeded]" />
