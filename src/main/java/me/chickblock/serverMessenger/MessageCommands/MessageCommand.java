@@ -9,18 +9,18 @@ import java.util.Objects;
 
 public class MessageCommand {
     private final String name;
-    private final byte[] commandKeyWord;
+    private final byte[] keyWord;
     private final SendType sendType;
     private final ResponseType responseType;
     private final PluginContainer registeredPlugin;
     private int registryID = -1;
 
 
-    public MessageCommand(@Nullable String commandTypeName, @NotNull String commandKeyWord, @NotNull SendType sendType, @NotNull ResponseType responseType, @NotNull PluginContainer registeringPlugin){
-        if(commandKeyWord.isBlank()){
+    public MessageCommand(@Nullable String commandTypeName, @NotNull String keyWord, @NotNull SendType sendType, @NotNull ResponseType responseType, @NotNull PluginContainer registeringPlugin){
+        if(keyWord.isBlank()){
             throw new IllegalArgumentException("Command word cannot be blank.");
         }
-        this.commandKeyWord = commandKeyWord.getBytes();
+        this.keyWord = keyWord.getBytes();
         this.name = commandTypeName;
         this.sendType = sendType;
         this.responseType = responseType;
@@ -31,8 +31,8 @@ public class MessageCommand {
         return name;
     }
 
-    public byte[] getCommandKeyWord(){
-        return commandKeyWord;
+    public byte[] getKeyWord(){
+        return keyWord;
     }
 
     public SendType getSendType(){
@@ -52,19 +52,19 @@ public class MessageCommand {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         MessageCommand that = (MessageCommand) o;
-        return Objects.deepEquals(commandKeyWord, that.commandKeyWord) && sendType == that.sendType && responseType == that.responseType && Objects.equals(registeredPlugin, that.registeredPlugin);
+        return Objects.deepEquals(keyWord, that.keyWord) && sendType == that.sendType && responseType == that.responseType && Objects.equals(registeredPlugin, that.registeredPlugin);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(Arrays.hashCode(commandKeyWord), sendType, responseType, registeredPlugin);
+        return Objects.hash(Arrays.hashCode(keyWord), sendType, responseType, registeredPlugin);
     }
 
     @Override
     public String toString() {
         return "MessageCommand{" +
                 "name='" + name + '\'' +
-                ", commandKeyWord=" + Arrays.toString(commandKeyWord) +
+                ", commandKeyWord=" + Arrays.toString(keyWord) +
                 ", sendType=" + sendType +
                 ", responseType=" + responseType +
                 ", registeredPlugin=" + registeredPlugin +
@@ -95,6 +95,6 @@ public class MessageCommand {
                 yield true;
             }
         };
-        return new ServerMessengerEvent(Arrays.toString(commandKeyWord), registeredPlugin.getDescription().getId(), responseRequired, voidReply);
+        return new ServerMessengerEvent(Arrays.toString(keyWord), registeredPlugin.getDescription().getId(), responseRequired, voidReply);
     }
 }
