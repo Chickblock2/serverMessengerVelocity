@@ -6,6 +6,7 @@ import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
@@ -71,7 +72,6 @@ public class ResponseHandler {
                 boolean noReply;
                 String pluginID;
                 String messageContents;
-                Plugin plugin;
                 Object eventToFire;
                 try {
                     keyWord = msgIn.readUTF(); // Read the data in the same way you wrote it
@@ -79,11 +79,9 @@ public class ResponseHandler {
                     noReply = msgIn.readBoolean();
                     pluginID = msgIn.readUTF();
                     messageContents = msgIn.readUTF();
-                    // Check for registered plugin to fire event for.
-                    plugin = EventClassRegistry.findPluginFromID(pluginID);
-                    if(plugin != null){
-                        eventToFire = EventClassRegistry.getEventFromPlugin(plugin);
-                    }else{
+                    // Check for an event that matches the received pluginId and keyword, else fire a generic event.
+                    eventToFire = EventClassRegistry.getEvent(pluginID, keyWord);
+                    if(eventToFire == null){
                         eventToFire = new ServerMessengerEvent(keyWord, pluginID, requiresResponse, noReply, messageContents);
                     }
                     eventManager.fire(eventToFire).thenAccept((returnedEvent) -> {

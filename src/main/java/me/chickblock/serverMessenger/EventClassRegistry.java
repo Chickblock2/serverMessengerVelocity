@@ -1,6 +1,7 @@
 package me.chickblock.serverMessenger;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.PluginContainer;
+import me.chickblock.serverMessenger.MessageEvents.EventRegistryEntry;
 import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
 import me.chickblock.serverMessenger.MessageEvents.ServerMessengerInitialiseEvent;
 import org.jetbrains.annotations.NotNull;
@@ -10,10 +11,7 @@ import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 
 public class EventClassRegistry {
-    private static ArrayList<Object> eventClassRegistry = new ArrayList<Object>();
-    private static ArrayList<Integer> idList = new ArrayList<Integer>();
-    private static ArrayList<Plugin> registeredPlugin = new ArrayList<Plugin>();
-    private static int idCount = -1;
+    private static ArrayList<EventRegistryEntry> eventClassRegistry = new ArrayList<EventRegistryEntry>();
     private static boolean initialise = false;
     private static boolean active = false;
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(EventClassRegistry.class);
@@ -36,18 +34,15 @@ public class EventClassRegistry {
     }
 
     // Registry Access Methods - PUBLIC
-    public boolean registerEvent(Object eventToRegister, Plugin plugin){
+    public static boolean registerEvent(EventRegistryEntry entry){
         if(!active){
             log.warn("A plugin is attempting to interact with the Event Class Registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
             return false;
         }
-        if(eventClassRegistry.contains(eventToRegister) || eventToRegister.getClass().isAssignableFrom(ServerMessengerEvent.class)){
+        if(eventClassRegistry.contains(entry) || entry.eventToFire().getClass().isAssignableFrom(ServerMessengerEvent.class)){
             return false;
         }else{
-            idCount++;
-            idList.add(idCount);
-            eventClassRegistry.add(eventToRegister);
-            registeredPlugin.add(plugin);
+            eventClassRegistry.add(entry);
             return true;
         }
     }
@@ -56,62 +51,16 @@ public class EventClassRegistry {
         return active;
     }
 
-    public static int getIndexOfPlugin(Plugin plugin){
-        if(!active){
-            log.warn("A plugin is attempting to interact with the Event Class Registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
-            return -1;
-        }
-        return(registeredPlugin.indexOf(plugin));
-    }
 
-    public static @Nullable Plugin findPluginFromID(@NotNull String pluginId){
-        if(!active){
-            log.warn("A plugin is attempting to interact with the Event Class Registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
-            return null;
-        }
-        if(pluginId.isBlank()){
-            return null;
-        }
-
-        for(Plugin p: registeredPlugin){
-            if(p.id().equals(pluginId)){
-                return p;
+    public static @Nullable Object getEvent(@Nullable String pluginId, @Nullable String keyWord){
+        for(EventRegistryEntry entry: eventClassRegistry){
+            if(entry.pluginId().equals(pluginId) && entry.keyWord().equals(keyWord)){
+                return entry.eventToFire();
             }
         }
         return null;
     }
 
-    public static @Nullable Object getEventFromPlugin(Plugin plugin){
-        if(!active){
-            log.warn("A plugin is attempting to interact with the Event Class Registry has been initialised. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
-            return null;
-        }
-        try{
-            return eventClassRegistry.get(registeredPlugin.indexOf(plugin));
-        }catch(IndexOutOfBoundsException e){
-            return null;
-        }
-
-    }
-
-    // Registry management Methods - INTERNAL USE ONLY
-    protected static boolean isInitialised() {
-        return initialise;
-    }
-
-    protected static ArrayList<Object> getEventClassRegistry() {
-        if(!initialise){
-            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access event class registry before registry has been initialised. This should not happen.");
-        }
-        return eventClassRegistry;
-    }
-
-    protected static ArrayList<Integer> getIdList() {
-        if(!initialise){
-            throw new InternalError("SERVER MESSENGER INTERNAL ERROR: Attempted to access event class registry before registry has been initialised. This should not happen.");
-        }
-        return idList;
-    }
 
 
 
