@@ -8,7 +8,7 @@ public class ServerMessengerEvent{
     private final boolean requireResponse;
     private final boolean voidReply;
     private String messageContents;
-    private PluginMessage replyMessage = null;
+    protected PluginMessage replyMessage = null;
     private int messageEventRegistryID = -1;
 
     public ServerMessengerEvent(@NotNull String keyWord, @NotNull String pluginID, boolean requireResponse, boolean voidReply){

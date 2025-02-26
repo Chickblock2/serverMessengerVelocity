@@ -4,7 +4,6 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class MessageCommand {
@@ -67,7 +66,7 @@ public class MessageCommand {
                 ", commandKeyWord=" + keyWord +
                 ", sendType=" + sendType +
                 ", responseType=" + responseType +
-                ", registeredPlugin=" + registeredPlugin +
+                ", registeredPlugin=" + registeredPlugin.getDescription().getName() +
                 '}';
     }
 
