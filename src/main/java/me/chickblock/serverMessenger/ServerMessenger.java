@@ -118,7 +118,7 @@ public class ServerMessenger {
     public static boolean sendMessage(@NotNull RegisteredServer destinationServer, @NotNull PluginMessage message){
         byte[] data;
         ByteArrayDataOutput in = ByteStreams.newDataOutput();
-        in.write(message.keyWord());
+        in.writeUTF(message.keyWord());
         in.writeBoolean(message.requiresResponse());
         in.writeBoolean(message.voidReply());
         in.writeUTF(message.pluginID());

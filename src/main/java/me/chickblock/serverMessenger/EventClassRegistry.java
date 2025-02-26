@@ -1,6 +1,5 @@
 package me.chickblock.serverMessenger;
 import com.velocitypowered.api.event.Subscribe;
-import me.chickblock.serverMessenger.MessageCommands.MessageCommand;
 import me.chickblock.serverMessenger.MessageEvents.EventRegistryEntry;
 import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
 import me.chickblock.serverMessenger.MessageEvents.ServerMessengerInitialiseEvent;
@@ -8,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import java.rmi.UnexpectedException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class EventClassRegistry {
     private static ArrayList<EventRegistryEntry> eventClassRegistry = new ArrayList<EventRegistryEntry>();
@@ -39,38 +37,27 @@ public class EventClassRegistry {
             log.warn("A plugin is attempting to interact with the Event Class Registry has been activated. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
             return false;
         }
-        if(entry == null){
-            return false;
-        }
-        if(eventClassRegistry.contains(entry) || entry.eventToFire().getClass().isAssignableFrom(ServerMessengerEvent.class)){
-            return false;
-        }else{
-            MessageCommand command = MessageCommandRegistry.getCommandFromId(entry.messageCommandRegistryId());
-            // If we have a valid command which matches the information in the registry entry, proceed with registry.
-            if ((command != null) || entry.keyWord().equals(command.getKeyWord()) || entry.registeringPlugin().equals(command.getRegisteredPlugin())) {
-                eventClassRegistry.add(entry);
-                return true;
-            }else{
-                return false;
+        if(entry != null){
+            if(entry.getRegisteredPlugin() != null || entry.getObjectToFire() != null){
+                if(!eventClassRegistry.contains(entry) || !entry.getObjectToFire().getClass().isAssignableFrom(ServerMessengerEvent.class)){
+                    eventClassRegistry.add(entry);
+                    return true;
+                }
             }
         }
+        return  false;
     }
 
     public static boolean isActive(){
         return active;
     }
 
-
     public static @Nullable Object getEvent(@Nullable String pluginId, @Nullable String keyWord){
         for(EventRegistryEntry entry: eventClassRegistry){
-            if(entry.registeringPlugin().getDescription().getId().equals(pluginId) && entry.keyWord().equals(keyWord)){
-                return entry.eventToFire();
+            if(entry.getRegisteredPlugin().getDescription().getId().equals(pluginId) && entry.getKeyword().equals(keyWord)){
+                return entry.getObjectToFire();
             }
         }
         return null;
     }
-
-
-
-
 }

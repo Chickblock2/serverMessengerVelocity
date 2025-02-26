@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class MessageCommand {
     private final String name;
-    private final byte[] keyWord;
+    private final String keyWord;
     private final SendType sendType;
     private final ResponseType responseType;
     private final PluginContainer registeredPlugin;
@@ -20,7 +20,7 @@ public class MessageCommand {
         if(keyWord.isBlank()){
             throw new IllegalArgumentException("Command word cannot be blank.");
         }
-        this.keyWord = keyWord.getBytes();
+        this.keyWord = keyWord;
         this.name = commandTypeName;
         this.sendType = sendType;
         this.responseType = responseType;
@@ -31,7 +31,7 @@ public class MessageCommand {
         return name;
     }
 
-    public byte[] getKeyWord(){
+    public String getKeyWord(){
         return keyWord;
     }
 
@@ -57,14 +57,14 @@ public class MessageCommand {
 
     @Override
     public int hashCode() {
-        return Objects.hash(Arrays.hashCode(keyWord), sendType, responseType, registeredPlugin);
+        return Objects.hash(keyWord, sendType, responseType, registeredPlugin);
     }
 
     @Override
     public String toString() {
         return "MessageCommand{" +
                 "name='" + name + '\'' +
-                ", commandKeyWord=" + Arrays.toString(keyWord) +
+                ", commandKeyWord=" + keyWord +
                 ", sendType=" + sendType +
                 ", responseType=" + responseType +
                 ", registeredPlugin=" + registeredPlugin +
@@ -95,6 +95,6 @@ public class MessageCommand {
                 yield true;
             }
         };
-        return new ServerMessengerEvent(Arrays.toString(keyWord), registeredPlugin.getDescription().getId(), responseRequired, voidReply);
+        return new ServerMessengerEvent(keyWord, registeredPlugin.getDescription().getId(), responseRequired, voidReply);
     }
 }
