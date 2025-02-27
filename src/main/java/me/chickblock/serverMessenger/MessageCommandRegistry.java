@@ -2,24 +2,22 @@ package me.chickblock.serverMessenger;
 
 import me.chickblock.serverMessenger.MessageCommands.MessageCommand;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MessageCommandRegistry {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(MessageCommandRegistry.class);
     private static final List<MessageCommand> commandRegistry = new ArrayList<MessageCommand>();
+    private static org.slf4j.Logger log;
     private static int idCount = -1;
-    private static final List<Integer> idRegistry = new ArrayList<Integer>();
     private static boolean active = false;
 
-    static void init(){
+    static void init(org.slf4j.Logger logger){
         if(active){
             return;
         }
+        MessageCommandRegistry.log = logger;
         MessageCommandRegistry.active = true;
     }
-
 
     public static boolean registerCommand(@Nullable MessageCommand command){
         if(!active){
@@ -39,7 +37,6 @@ public class MessageCommandRegistry {
         log.info("Registering new Server Messenger command from plugin: " + command.getRegisteredPlugin().getDescription().getId());
         idCount++;
         command.setRegistryID(idCount);
-        idRegistry.add(idCount);
         commandRegistry.add(command);
         return true;
     }
@@ -50,9 +47,8 @@ public class MessageCommandRegistry {
             return -1;
         }
 
-        int index = commandRegistry.indexOf(command);
-        if(index >= 0){
-            return idRegistry.get(index);
+        if(commandRegistry.contains(command)) {
+            return commandRegistry.get(commandRegistry.indexOf(command)).getRegistryID();
         }else{
             return -1;
         }
@@ -63,14 +59,11 @@ public class MessageCommandRegistry {
             log.warn("A plugin is attempting to register a Message Command before the registry has been activated. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");
             return null;
         }
-
-        if(idRegistry.contains(i)){
-            return commandRegistry.get(idRegistry.indexOf(i));
-        }else{
-            return null;
+        if(i <= 0 && i < commandRegistry.size()){
+            return commandRegistry.get(i);
         }
+        return null;
     }
-
 
     public static boolean commandIsInRegistry(MessageCommand command){
         if(!active){

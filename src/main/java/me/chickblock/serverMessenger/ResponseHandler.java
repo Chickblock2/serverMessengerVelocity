@@ -16,16 +16,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ResponseHandler {
-    private static final Logger log = LoggerFactory.getLogger(ResponseHandler.class);
+    private static Logger log;
     private static EventManager eventManager;
     private static boolean active = false;
 
 
 
-    protected static void init(EventManager eventManager){
+    protected static void init(EventManager eventManager, org.slf4j.Logger logger){
         if(active){
             return;
         }
+        ResponseHandler.log = logger;
         ResponseHandler.eventManager = eventManager;
         active = true;
     }

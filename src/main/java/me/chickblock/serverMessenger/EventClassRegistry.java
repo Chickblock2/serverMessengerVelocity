@@ -2,18 +2,18 @@ package me.chickblock.serverMessenger;
 import me.chickblock.serverMessenger.MessageEvents.EventRegistryEntry;
 import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 
 public class EventClassRegistry {
     private static ArrayList<EventRegistryEntry> eventClassRegistry = new ArrayList<EventRegistryEntry>();
     private static boolean active = false;
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(EventClassRegistry.class);
+    private static org.slf4j.Logger log;
 
-    static void init(){
+    static void init(org.slf4j.Logger logger){
         if(active){
             return;
         }
+        EventClassRegistry.log = logger;
         EventClassRegistry.active = true;
     }
 

@@ -46,11 +46,11 @@ public class ServerMessenger {
         eventManager.register(this, new MessageCommandRegistry());
         eventManager.register(this, new EventClassRegistry());
         logger.info("Initialising Event Class Registry...");
-        EventClassRegistry.init();
+        EventClassRegistry.init(logger);
         logger.info("Initialising Message Command Registry...");
-        MessageCommandRegistry.init();
+        MessageCommandRegistry.init(logger);
         logger.info("Initialising Packet Listener...");
-        ResponseHandler.init(eventManager);
+        ResponseHandler.init(eventManager, logger);
         logger.info("All modules initialised, activating registries and packet listener...");
         eventManager.fireAndForget(new ServerMessengerInitialiseEvent());
         logger.info("Server messenger has successfully started, registries are now operational.");
