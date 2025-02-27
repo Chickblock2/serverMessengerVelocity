@@ -1,4 +1,4 @@
-package me.chickblock.serverMessenger;
+package me.chickblock.serverMessenger.MessageEvents;
 
 public class ServerMessengerInitialiseEvent {
 

@@ -12,6 +12,7 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.chickblock.serverMessenger.MessageCommands.MessageCommand;
 import me.chickblock.serverMessenger.MessageEvents.PluginMessage;
+import me.chickblock.serverMessenger.MessageEvents.ServerMessengerInitialiseEvent;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
