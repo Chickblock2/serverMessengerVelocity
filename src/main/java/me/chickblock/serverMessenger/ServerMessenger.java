@@ -12,7 +12,6 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.chickblock.serverMessenger.MessageCommands.MessageCommand;
 import me.chickblock.serverMessenger.MessageEvents.PluginMessage;
-import me.chickblock.serverMessenger.MessageEvents.ServerMessengerInitialiseEvent;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,12 +27,11 @@ public class ServerMessenger {
     public static final MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.from("servermessenger:main");
     private final ProxyServer SERVER;
     private static Logger logger;
-    private static EventManager eventManager;
 
 
     @Inject
-    private ServerMessenger(ProxyServer SERVER, Logger logger){
-        this.SERVER = SERVER;
+    private ServerMessenger(ProxyServer server, Logger logger){
+        this.SERVER = server;
         ServerMessenger.logger = logger;
     }
 
@@ -41,29 +39,21 @@ public class ServerMessenger {
     @Subscribe
     private void onProxyInitialization(ProxyInitializeEvent event) {
         logger.info("Starting server messenger...");
-        eventManager = SERVER.getEventManager();;
+        EventManager eventManager = SERVER.getEventManager();
+        logger.info("Registering listeners...");
         SERVER.getChannelRegistrar().register(IDENTIFIER);
+        eventManager.register(this, new MessageCommandRegistry());
+        eventManager.register(this, new EventClassRegistry());
         logger.info("Initialising Event Class Registry...");
         EventClassRegistry.init();
         logger.info("Initialising Message Command Registry...");
         MessageCommandRegistry.init();
         logger.info("Initialising Packet Listener...");
         ResponseHandler.init(eventManager);
-        logger.info("All modules initialised, activating registries and and packet listener...");
-        eventManager.fire(new ServerMessengerInitialiseEvent(this, getMessageCommandRegistry(), getEventClassRegistry()));
-        logger.info("Server messenger has successfully started.");
+        logger.info("All modules initialised, activating registries and packet listener...");
+        eventManager.fireAndForget(new ServerMessengerInitialiseEvent());
+        logger.info("Server messenger has successfully started, registries are now operational.");
         logger.info("Now listening for packets sent on the " + PLUGIN_MESSAGING_CHANNEL + " channel.");
-        logger.info("Registries are now open for operational use.");
-    }
-
-    @Contract(value = " -> new", pure = true)
-    public static @NotNull EventClassRegistry getEventClassRegistry(){
-        return new EventClassRegistry();
-    }
-
-    @Contract(value = " -> new", pure = true)
-    public static @NotNull MessageCommandRegistry getMessageCommandRegistry() {
-        return new MessageCommandRegistry();
     }
 
     public static @Nullable PluginMessage composeMessage(int messageCommandRegistryID, @NotNull String messageContents){
@@ -126,6 +116,5 @@ public class ServerMessenger {
         data = in.toByteArray();
         return destinationServer.sendPluginMessage(IDENTIFIER, data);
     }
-
-
 }
+

@@ -1,11 +1,8 @@
 package me.chickblock.serverMessenger;
 
-import com.velocitypowered.api.event.Subscribe;
 import me.chickblock.serverMessenger.MessageCommands.MessageCommand;
-import me.chickblock.serverMessenger.MessageEvents.ServerMessengerInitialiseEvent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
-import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,28 +11,16 @@ public class MessageCommandRegistry {
     private static final List<MessageCommand> commandRegistry = new ArrayList<MessageCommand>();
     private static int idCount = -1;
     private static final List<Integer> idRegistry = new ArrayList<Integer>();
-    private static boolean initialise = false;
     private static boolean active = false;
 
-    // Initialisation/Activation of Registry
-    protected static void init(){
-        if(initialise){
+    static void init(){
+        if(active){
             return;
         }
-        MessageCommandRegistry.initialise = true;
+        MessageCommandRegistry.active = true;
     }
 
-    @Subscribe
-    private void onServerMessengerInitialised(ServerMessengerInitialiseEvent event) throws UnexpectedException {
-        if(initialise){
-            active = true;
-        }else{
-            throw new UnexpectedException("FATAL ERROR: Somehow the ServerMessengerInitialiseEvent was thrown before the Event Class Registry was fully initialised. This should NEVER happen.");
-        }
 
-    }
-
-    // Registry Access Methods - Public use
     public static boolean registerCommand(@Nullable MessageCommand command){
         if(!active){
             log.warn("A plugin is attempting to register a Message Command before the registry has been activated. If you are the developer please wait for for ServerMessengerInitialiseEvent before attempting to interact with Server Messenger.");

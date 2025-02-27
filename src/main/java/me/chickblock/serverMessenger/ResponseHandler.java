@@ -5,16 +5,12 @@ import com.google.common.io.ByteStreams;
 import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
-import com.velocitypowered.api.plugin.Plugin;
-import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import me.chickblock.serverMessenger.MessageEvents.ServerMessengerEvent;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.rmi.UnexpectedException;
-import me.chickblock.serverMessenger.MessageEvents.ServerMessengerInitialiseEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,28 +18,18 @@ import org.slf4j.LoggerFactory;
 public class ResponseHandler {
     private static final Logger log = LoggerFactory.getLogger(ResponseHandler.class);
     private static EventManager eventManager;
-    private static boolean initialise = false;
     private static boolean active = false;
 
 
 
     protected static void init(EventManager eventManager){
-        if(initialise){
+        if(active){
             return;
         }
         ResponseHandler.eventManager = eventManager;
-        initialise = true;
+        active = true;
     }
 
-    @Subscribe
-    private void onServerMessengerInitialised(ServerMessengerInitialiseEvent event) throws UnexpectedException {
-        if(initialise){
-            active = true;
-        }else{
-            throw new UnexpectedException("FATAL ERROR: Somehow the ServerMessengerInitialiseEvent was thrown before the Event Class Registry was fully initialised. This should NEVER happen.");
-        }
-
-    }
 
     @Subscribe
     private static void onPluginMessageFromBackend(@NotNull PluginMessageEvent event){
@@ -109,9 +95,5 @@ public class ResponseHandler {
 
     public static boolean isActive() {
         return active;
-    }
-
-    protected static  boolean isInitialise(){
-        return initialise;
     }
 }
